@@ -10,6 +10,7 @@
 
 ## 활용 데이터 설명
 9월 23일까지의 일일 데이터를 활용하여 9/30~10/4까지의 확진자 수 예측
+
 Y 레이블: 경기도 일일 확진자수
 
 
@@ -124,15 +125,23 @@ DTW는 데이터 간 연속된 시계열성을 고려하여 시퀀스 간의 유
 예) 7일의 time-lag를 갖는 1/26 ~ 9/7일의 '집단 감염' 검색어 트렌드(X)와 2/2 ~ 9/14의 확진자(Y)의 correlation 계산
 
 검정 결과, 7~10일 사이의 timelag에 대해 많은 변수들이 가장 큰 correlation을 가졌고 유의한 p-value를 가졌다. 앞서 언급한 변수들 중 유의한 p-value를 갖는 변수들을 최종 X변수로 선정해 예측하는데 활용하였다.
+-> VariableSelection.ipynb
 
 
 ### Many-To-One LSTM
 시계열 분석에 용이하며 RNN 기반의 NeuralNetwork 모델인 LSTM을 적용하였다.
+->RNN_based.py
 
 예측 모델을 위해 2가지 Framework를 논의하였다.
 - Framework1: 11일 뒤의 확진자를 예측하도록 학습된 하나의 LSTM 모델을 학습하여 예측 (ex. 9/19일까지의 데이터를 이용하여 9/30일의 확진자를, 9/20일까지의 데이터를 이용하여 10/1의 확진자를....)
 - Framework2: 7,8,9,10,11일 뒤의 확진자를 예측하는 5개의 모델1~5를 학습하여 예측(9/23일까지의 데이터를 활용하여 7일 뒤인 9/30일을 예측하는 model1, 9/23일까지의 데이터를 활용하여 8일 뒤인 10/1일을 예측하는 model2 ...)
 - 학습 이터가 적어 시간이 크게 소요되지 않고, 9/23일까지의 최신 데이터를 최대한 활용할 수 있다는 장점을 고려하여, Framework2를 선택
 
--Preprocessing
+- Preprocessing: Sklearn의 preprocessing 활용하여 X 에는 MinMaxScaling, Y에는 극댓값 처리를 위해 Log-transformation 처리
+
+- Training:
+- 1) 분할 전 Dataset을 모델의 시차에 따라 달리 준비
+- 2) 앞부분을 차지하는 95%의 X, Y 에 대해 학습한 뒤, 마지막 5%의 시계열을 통해 Evaluation 진행
+- 3) Epoch 마다 모델의 Evaluation loss(MSELoss) 계산 후 최적 모델 선정에 활용
+-> Training_Prediction.ipynb
 
